@@ -1,17 +1,20 @@
+require("dotenv").config();
+const express = require("express");
+const app = express();
+
+//*connect to db
 const { default: mongoose } = require("mongoose");
 const connectToMongo = require("./config/dbConn");
-const express = require("express");
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 
 //*connect to db
 connectToMongo();
 
-app.use(express.json()); // for handling json
+app.use(express.json()); //for handling json
 
 //*Available routes
-app.use("/api/auth", require("./routes/auth"));
+app.use("/api/signup", require("./routes/auth/signup"));
 
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
