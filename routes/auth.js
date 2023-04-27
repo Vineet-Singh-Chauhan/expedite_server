@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 //* schema
-const UserSchema = require("../models/userSchema");
+const UserSchema = require("../models/UserSchema");
 
 //create a user using POST "api/auth". doesnot require auth
 router.post("/", async (req, res) => {
