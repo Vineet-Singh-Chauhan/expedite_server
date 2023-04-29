@@ -1,6 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 const bcryptjs = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 //* schema
 const UserSchema = require("../../models/UserSchema");
 const {
@@ -22,6 +24,9 @@ router.post("/", async (req, res) => {
     password,
     phone,
   } = req.body;
+  console.log(req.body);
+
+  // console.log(req);
 
   if (
     !firstName ||
@@ -32,6 +37,15 @@ router.post("/", async (req, res) => {
     !password ||
     !confirmPassword
   ) {
+    const errors = {
+      firstName: !firstName ? "This is mandatory field!" : null,
+      lastName: !lastName ? "This is mandatory field!" : null,
+      gender: !gender ? "This is mandatory field!" : null,
+      dob: !dob ? "This is mandatory field!" : null,
+      email: !email ? "This is mandatory field!" : null,
+      password: !password ? "This is mandatory field!" : null,
+      confirmPassword: !confirmPassword ? "This is mandatory field!" : null,
+    };
     return res
       .status(400)
       .json({ error: "Please fill all the mandatory fields!" });
@@ -43,9 +57,21 @@ router.post("/", async (req, res) => {
     !emailregex.test(email) ||
     !passwordRegex.test(password)
   ) {
+    const errors = {
+      firstName: !nameregex.test(firstName)
+        ? "First name can only contain alphabets !"
+        : null,
+      lastName: !nameregex.test(lastName)
+        ? "Last name can only contain alphabets !"
+        : null,
+      email: !emailregex.test(email) ? "This is mandatory field!" : null,
+      password: !passwordRegex.test(password)
+        ? "This is mandatory field!"
+        : null,
+    };
     return res
       .status(400)
-      .json({ error: "Please fill valid values in all fields" });
+      .json({ error: "Invalid input is recieved in one or more field(s)" });
   }
   let ToDate = new Date();
   if (new Date(dob).getTime() > ToDate.getTime()) {
@@ -53,8 +79,11 @@ router.post("/", async (req, res) => {
       .status(400)
       .json({ error: "Please enter a valid date of birth" });
   }
-  if (phone !== "" && !phoneregex.test(phone)) {
-    return res.status(400).json({ error: "Please enter a phone number" });
+  if (gender !== "male" && gender !== "female" && gender !== "not said") {
+    return res.status(400).json({ error: "Please select valid field!" });
+  }
+  if (phone !== "" && phone !== undefined && !phoneregex.test(phone)) {
+    return res.status(400).json({ error: "Please enter a valid phone number" });
   }
   if (confirmPassword !== password) {
     return res.status(400).json({ error: "Passwords do not match!" });
@@ -62,37 +91,38 @@ router.post("/", async (req, res) => {
   //checking for already existing user;
   const duplicate = await UserSchema.findOne({ email: email }).exec();
 
-  if (duplicate) return res.sendStatus(409);
+  if (duplicate)
+    return res
+      .status(409)
+      .json({ error: { message: "This email is already registered!" } });
 
   try {
     //encrypt password
-    const hashedPwd = await bcryptjs.hash(password, 10);
-    if (phone) {
-      const result = await UserSchema.create({
-        dob,
-        email,
-        firstName,
-        gender,
-        lastName,
-        password: hashedPwd,
-        phone,
-      });
-      console.log(result);
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPwd = await bcryptjs.hash(password, salt);
 
-      res.status(201).json({ message: `New User ${firstName} Created` });
-    } else if (!phone) {
-      const result = await UserSchema.create({
-        dob,
-        email,
-        firstName,
-        gender,
-        lastName,
-        password: hashedPwd,
-      });
-      console.log(result);
-
-      res.status(201).json({ message: `New User ${firstName} Created` });
-    }
+    const result = await UserSchema.create({
+      dob,
+      email,
+      firstName,
+      gender,
+      lastName,
+      password: hashedPwd,
+      phone,
+    });
+    console.log(result);
+    const data = {
+      user: {
+        id: result._id,
+      },
+    };
+    console.log(data);
+    const authToken = jwt.sign(data, process.env.JWT_SECRET);
+    console.log(authToken);
+    res.status(201).json({
+      message: `Hooray! ${firstName} you have successfully been registered.`,
+      authToken,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

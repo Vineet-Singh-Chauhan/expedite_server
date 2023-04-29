@@ -14,6 +14,7 @@ const UserSchema = new Schema({
   tasks: [],
   notifications: [{ body: String, date: Date }],
   about: String,
+  refreshToken: [String],
   date: { type: Date, default: Date.now },
 });
 
