@@ -4,8 +4,9 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const UserSchema = require("../../models/UserSchema");
 
-router.post("/", async (req, res) => {
+router.get("/", async (req, res) => {
   const cookies = req.cookies;
+  console.log(cookies);
   if (!cookies?.jwt) return res.sendStatus(401);
   console.log(cookies.jwt);
   const refreshToken = cookies.jwt;
