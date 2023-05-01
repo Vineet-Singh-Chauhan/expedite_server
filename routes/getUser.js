@@ -7,7 +7,9 @@ router.post("/", fetchUserById, async (req, res) => {
   try {
     const userId = req.user.id;
     // grab all details except pssword
-    const user = await UserSchema.findById(userId).select("-password");
+    const user = await UserSchema.findById(userId).select(
+      "-password -refreshToken"
+    );
     res.send(user);
   } catch (error) {
     console.log(error.message);

@@ -8,16 +8,18 @@ const fetchUserById = (req, res, next) => {
   if (!token) {
     return res
       .status(401)
-      .send({ error: "Please authenticate using a valid token" });
+      .send({ error: "Please authenticate using a valid token !" });
   }
   try {
-    const data = jwt.verify(token, process.env.JWT_SECRET);
+    const data = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     req.user = data.user;
     // console.log(req.user);
     next();
   } catch (error) {
     console.log(error);
-    res.status(401).send({ error: "Please authenticate using a valid token" });
+    res
+      .status(401)
+      .send({ error: "Please authenticate using a valid token !" });
   }
 };
 

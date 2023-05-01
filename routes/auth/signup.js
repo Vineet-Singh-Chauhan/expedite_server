@@ -111,17 +111,17 @@ router.post("/", async (req, res) => {
       phone,
     });
     console.log(result);
-    const data = {
+    const payload = {
       user: {
         id: result._id,
       },
     };
-    console.log(data);
-    const authToken = jwt.sign(data, process.env.JWT_SECRET);
-    console.log(authToken);
+    console.log(payload);
+    const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET);
+    console.log(accessToken);
     res.status(201).json({
       message: `Hooray! ${firstName} you have successfully been registered.`,
-      authToken,
+      accessToken,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
