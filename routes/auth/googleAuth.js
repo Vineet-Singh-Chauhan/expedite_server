@@ -69,7 +69,7 @@ router.post("/", async (req, res) => {
         res.cookie("jwt", newRefreshToken, {
           httpOnly: true,
           sameSite: "None",
-          // secure: true, // put this option in production but not in dev server
+          secure: true, // put this option in production but not in dev server
           maxAge: 24 * 60 * 60 * 1000,
         });
 

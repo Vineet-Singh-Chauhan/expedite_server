@@ -7,6 +7,8 @@ const cors = require("cors");
 const { default: mongoose } = require("mongoose");
 const connectToMongo = require("./config/dbConn");
 const cookieParser = require("cookie-parser");
+const corsOptions = require("./config/corsOptions");
+const setCredentials = require("./middleware/setCredentials");
 // const bodyParser = require("body-parser");
 
 const PORT = process.env.PORT || 3000;
@@ -14,7 +16,8 @@ const PORT = process.env.PORT || 3000;
 //*connect to db
 connectToMongo();
 
-app.use(cors());
+app.use(setCredentials);
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());

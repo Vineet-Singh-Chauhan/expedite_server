@@ -6,10 +6,11 @@ const UserSchema = require("../../models/UserSchema");
 
 router.get("/", async (req, res) => {
   const cookies = req.cookies;
-  console.log(cookies);
-  if (!cookies?.jwt) return res.sendStatus(401);
-  console.log(cookies.jwt);
+  if (!cookies?.jwt) {
+    return res.sendStatus(401);
+  }
   const refreshToken = cookies.jwt;
+  console.log("refresh token revieved", refreshToken);
 
   // to make refresh token single use
   res.clearCookie("jwt", { httpOnly: true });
@@ -26,14 +27,17 @@ router.get("/", async (req, res) => {
         if (err) return res.sendStatus(403);
 
         // used refresh token
+        console.log("decode id", decoded.user.id);
         const hackedUser = await UserSchema.findOne({
           id: decoded.user.id,
         }).exec();
+        console.log("from refresh", hackedUser);
         hackedUser.refreshToken = []; // invalidated all refresh tokens
         const result = await hackedUser.save();
-        console.log(result);
+        console.log("form refresh", result);
       }
     );
+    return res.sendStatus(403);
   }
 
   // if everything is okay
@@ -51,7 +55,7 @@ router.get("/", async (req, res) => {
         const result = await foundUser.save();
       }
       if (err || foundUser.id !== decoded.user.id) {
-        console.log(err);
+        console.log("from refresh:", err);
         return res.sendStatus(403);
       }
       // refresh token is still valid
@@ -60,7 +64,7 @@ router.get("/", async (req, res) => {
           id: foundUser._id,
         },
       };
-      console.log(payload);
+      console.log("from refresh 2", payload);
       const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "30s",
       });
@@ -78,10 +82,9 @@ router.get("/", async (req, res) => {
       res.cookie("jwt", newRefreshToken, {
         httpOnly: true,
         sameSite: "None",
-        // secure: true, // put this option in production but not in dev server
+        secure: true, // put this option in production but not in dev server
         maxAge: 24 * 60 * 60 * 1000,
       });
-
       res.json({ accessToken });
     }
   );
