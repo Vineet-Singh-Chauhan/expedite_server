@@ -45,7 +45,7 @@ router.get("/", async (req, res) => {
 
   // if everything is okay
   const newRefreshTokenArray = foundUser.refreshToken.filter(
-    (rt) => rt != refreshToken
+    (rt) => rt !== refreshToken
   );
 
   // evaluate jwt
