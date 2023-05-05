@@ -7,7 +7,7 @@ const UserSchema = require("../../models/UserSchema");
 router.get("/", async (req, res) => {
   const cookies = req.cookies;
   if (!cookies?.jwt) {
-    return res.sendStatus(401);
+    return res.sendStatus(403);
   }
   const refreshToken = cookies.jwt;
   console.log("refresh token revieved", refreshToken);
@@ -16,9 +16,10 @@ router.get("/", async (req, res) => {
   res.clearCookie("jwt", { httpOnly: true });
 
   const foundUser = await UserSchema.findOne({ refreshToken }).exec();
-
+  console.log(foundUser);
   if (!foundUser) {
     // detected refresh token reuse
+    console.log("not this");
     jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET,
@@ -29,9 +30,9 @@ router.get("/", async (req, res) => {
         // used refresh token
         console.log("decode id", decoded.user.id);
         const hackedUser = await UserSchema.findOne({
-          id: decoded.user.id,
+          _id: decoded.user.id,
         }).exec();
-        console.log("from refresh", hackedUser);
+        // console.log("from refresh", hackedUser);
         hackedUser.refreshToken = []; // invalidated all refresh tokens
         const result = await hackedUser.save();
         console.log("form refresh", result);
