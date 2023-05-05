@@ -7,13 +7,15 @@ const UserSchema = require("../../models/UserSchema");
 router.get("/", async (req, res) => {
   const cookies = req.cookies;
   if (!cookies?.jwt) {
-    return res.sendStatus(403);
+    return res.sendStatus(401);
   }
   const refreshToken = cookies.jwt;
   console.log("refresh token revieved", refreshToken);
 
   // to make refresh token single use
-  res.clearCookie("jwt", { httpOnly: true });
+  res.clearCookie("jwt", {
+    httpOnly: true,
+  });
 
   const foundUser = await UserSchema.findOne({ refreshToken }).exec();
   console.log(foundUser);
@@ -79,7 +81,9 @@ router.get("/", async (req, res) => {
       );
       // saving refresh token with current user
       foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
+      console.log("new token:", newRefreshToken);
       const result = await foundUser.save();
+      console.log("new user:", foundUser);
       res.cookie("jwt", newRefreshToken, {
         httpOnly: true,
         sameSite: "None",

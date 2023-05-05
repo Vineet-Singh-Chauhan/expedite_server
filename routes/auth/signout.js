@@ -13,7 +13,9 @@ router.post("/", async (req, res) => {
   const foundUser = await UserSchema.findOne({ refreshToken }).exec();
 
   if (!foundUser) {
-    res.clearCookie("jwt", { httpOnly: true });
+    res.clearCookie("jwt", {
+      httpOnly: true,
+    });
     return res.sendStatus(204);
   }
 
@@ -24,7 +26,9 @@ router.post("/", async (req, res) => {
 
   const result = await foundUser.save();
 
-  res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
+  res.clearCookie("jwt", {
+    httpOnly: true,
+  });
   console.log(result);
   // these options need to be identical to when the cookie was created (ie same as in authController)
 
