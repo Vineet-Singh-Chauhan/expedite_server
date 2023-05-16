@@ -35,7 +35,9 @@ router.get("/", async (req, res) => {
           _id: decoded.user.id,
         }).exec();
         // console.log("from refresh", hackedUser);
-        hackedUser.refreshToken = []; // invalidated all refresh tokens
+        if (hackedUser) {
+          hackedUser.refreshToken = []; // invalidated all refresh tokens
+        }
         const result = await hackedUser.save();
         console.log("form refresh", result);
       }

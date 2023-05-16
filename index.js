@@ -9,6 +9,7 @@ const connectToMongo = require("./config/dbConn");
 const cookieParser = require("cookie-parser");
 const corsOptions = require("./config/corsOptions");
 const setCredentials = require("./middleware/setCredentials");
+const verifyJWT = require("./middleware/verifyJWT");
 // const bodyParser = require("body-parser");
 
 const PORT = process.env.PORT || 3000;
@@ -25,11 +26,16 @@ app.use(cookieParser());
 //*Available routes
 app.use("/api/signup", require("./routes/auth/signup"));
 app.use("/api/signin", require("./routes/auth/signin"));
-app.use("/api/getuser", require("./routes/getUser"));
 app.use("/api/signout", require("./routes/auth/signout"));
 app.use("/api/google-auth", require("./routes/auth/googleAuth"));
 app.use("/api/refresh", require("./routes/auth/refresh"));
 
+//protected
+app.use(verifyJWT);
+
+app.use("/api/getuser", require("./routes/getUser"));
+app.use("/api/createworkspace", require("./routes/createWorkspace"));
+app.use("/api/updateuser", require("./routes/updateuser"));
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
   app.listen(PORT, () => {

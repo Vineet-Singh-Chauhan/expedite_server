@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+const { taskInfo, workspaceInfo } = require("./shortSchemas");
 
 const UserSchema = new Schema({
   firstName: { type: String, required: true },
@@ -10,10 +11,10 @@ const UserSchema = new Schema({
   phone: { type: Number },
   password: { type: String, required: true },
   isVerified: { type: Boolean, default: false },
-  workspaces: [],
-  tasks: [],
+  workspaces: [workspaceInfo],
+  tasks: [taskInfo],
   notifications: [{ body: String, date: Date }],
-  about: String,
+  about: { type: String, default: "" },
   refreshToken: [String],
   date: { type: Date, default: Date.now },
 });

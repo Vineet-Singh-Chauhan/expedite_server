@@ -1,9 +1,8 @@
 const express = require("express");
-const fetchUserById = require("../middleware/fetchUserById");
 const UserSchema = require("../models/UserSchema");
 const router = express.Router();
 
-router.post("/", fetchUserById, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const userId = req.user.id;
     // grab all details except pssword
