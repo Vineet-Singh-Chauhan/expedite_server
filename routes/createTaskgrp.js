@@ -1,7 +1,5 @@
 const isWorkspaceUser = require("../middleware/isWorkspaceUser");
 const TaskGroup = require("../models/TaskGroup");
-const UserSchema = require("../models/UserSchema");
-const WorkspaceSchema = require("../models/WorkspaceSchema");
 
 const express = require("express");
 const router = express.Router();

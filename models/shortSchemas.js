@@ -8,12 +8,14 @@ const membersInfo = new Schema({
 });
 const taskInfo = new Schema({
   id: { type: ObjectId, required: true },
-  title: { type: String, required: true },
-  grp: { type: ObjectId, required: true },
-  tags: [{ type: String, title: String }],
-  date: { type: Date, default: Date.now },
-  assignee: [membersInfo],
-  desc: { type: String },
+  workspace: { type: ObjectId, required: true },
+  grpId: { type: ObjectId, required: true },
+  assignees: [membersInfo],
+  dueDate: { type: Date },
+  taskDesc: { type: String },
+  taskStatus: { type: String, default: "Not Started" },
+  taskTags: [String],
+  taskTitle: { type: String, required: true },
 });
 const taskGrpInfo = new Schema({
   id: { type: ObjectId, required: true },
