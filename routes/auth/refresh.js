@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
     return res.sendStatus(401);
   }
   const refreshToken = cookies.jwt;
-  console.log("refresh token revieved", refreshToken);
+  // console.log("refresh token revieved", refreshToken);
 
   // to make refresh token single use
   res.clearCookie("jwt", {
@@ -18,10 +18,10 @@ router.get("/", async (req, res) => {
   });
 
   const foundUser = await UserSchema.findOne({ refreshToken }).exec();
-  console.log(foundUser);
+  // console.log(foundUser);
   if (!foundUser) {
     // detected refresh token reuse
-    console.log("not this");
+    // console.log("not this");
     jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET,
@@ -30,7 +30,7 @@ router.get("/", async (req, res) => {
         if (err) return res.sendStatus(403);
 
         // used refresh token
-        console.log("decode id", decoded.user.id);
+        // console.log("decode id", decoded.user.id);
         const hackedUser = await UserSchema.findOne({
           _id: decoded.user.id,
         }).exec();
@@ -39,7 +39,7 @@ router.get("/", async (req, res) => {
           hackedUser.refreshToken = []; // invalidated all refresh tokens
         }
         const result = await hackedUser.save();
-        console.log("form refresh", result);
+        // console.log("form refresh", result);
       }
     );
     return res.sendStatus(403);
@@ -69,7 +69,7 @@ router.get("/", async (req, res) => {
           id: foundUser._id,
         },
       };
-      console.log("from refresh 2", payload);
+      // console.log("from refresh 2", payload);
       const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "30s",
       });
@@ -83,9 +83,9 @@ router.get("/", async (req, res) => {
       );
       // saving refresh token with current user
       foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
-      console.log("new token:", newRefreshToken);
+      // console.log("new token:", newRefreshToken);
       const result = await foundUser.save();
-      console.log("new user:", foundUser);
+      // console.log("new user:", foundUser);
       res.cookie("jwt", newRefreshToken, {
         httpOnly: true,
         sameSite: "None",

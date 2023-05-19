@@ -29,7 +29,7 @@ router.post("/", async (req, res) => {
   res.clearCookie("jwt", {
     httpOnly: true,
   });
-  console.log(result);
+  // console.log(result);
   // these options need to be identical to when the cookie was created (ie same as in authController)
 
   res.sendStatus(204);

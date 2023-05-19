@@ -24,7 +24,7 @@ router.post("/", async (req, res) => {
     password,
     phone,
   } = req.body;
-  console.log(req.body);
+  // console.log(req.body);
 
   // console.log(req);
 
@@ -110,15 +110,15 @@ router.post("/", async (req, res) => {
       password: hashedPwd,
       phone,
     });
-    console.log(result);
+    // console.log(result);
     const payload = {
       user: {
         id: result._id,
       },
     };
-    console.log(payload);
+    // console.log(payload);
     const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET);
-    console.log(accessToken);
+    // console.log(accessToken);
     res.status(201).json({
       message: `Hooray! ${firstName} you have successfully been registered.`,
       accessToken,

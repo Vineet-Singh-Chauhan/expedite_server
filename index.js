@@ -36,6 +36,8 @@ app.use(verifyJWT);
 app.use("/api/getuser", require("./routes/getUser"));
 app.use("/api/createworkspace", require("./routes/createWorkspace"));
 app.use("/api/updateuser", require("./routes/updateuser"));
+app.use("/api/gettasks", require("./routes/getTasks"));
+app.use("/api/createtaskgrp", require("./routes/createTaskgrp"));
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
   app.listen(PORT, () => {

@@ -20,7 +20,7 @@ router.post("/", async (req, res) => {
         email: profile.email,
       }).exec();
 
-      console.log("from profile", profile);
+      // console.log("from profile", profile);
 
       if (foundUser) {
         const payload = {
@@ -86,15 +86,15 @@ router.post("/", async (req, res) => {
           lastName: profile.family_name,
           password: hashedPwd,
         });
-        console.log(result);
+        // console.log(result);
         const payload = {
           user: {
             id: result._id,
           },
         };
-        console.log(payload);
+        // console.log(payload);
         const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET);
-        console.log(accessToken);
+        // console.log(accessToken);
         res.status(201).json({
           message: `Hooray! ${profile.given_name} you have successfully been registered.`,
           accessToken,

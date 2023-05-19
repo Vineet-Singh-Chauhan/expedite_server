@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const { workspaceInfo, taskInfo, membersInfo } = require("./shortSchemas");
+const { taskInfo, membersInfo, taskGrpInfo } = require("./shortSchemas");
 ObjectId = Schema.ObjectId;
 const WorkspaceSchema = new Schema({
   name: { type: String, required: true },
   adminId: { type: ObjectId, required: true },
   members: [membersInfo],
-  tasks: [taskInfo],
+  // tasks: [taskInfo],
+  taskGroups: [taskGrpInfo],
   notifications: [{ body: String, date: Date }],
   about: String,
   date: { type: Date, default: Date.now },

@@ -9,14 +9,19 @@ const membersInfo = new Schema({
 const taskInfo = new Schema({
   id: { type: ObjectId, required: true },
   title: { type: String, required: true },
+  grp: { type: ObjectId, required: true },
   tags: [{ type: String, title: String }],
   date: { type: Date, default: Date.now },
   assignee: [membersInfo],
   desc: { type: String },
+});
+const taskGrpInfo = new Schema({
+  id: { type: ObjectId, required: true },
+  name: { type: String, required: true },
 });
 const workspaceInfo = new Schema({
   id: { type: ObjectId, required: true },
   name: { type: String, required: true },
 });
 
-module.exports = { membersInfo, taskInfo, workspaceInfo };
+module.exports = { membersInfo, taskInfo, workspaceInfo, taskGrpInfo };
