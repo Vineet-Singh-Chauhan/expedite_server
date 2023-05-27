@@ -9,7 +9,7 @@ const WorkspaceSchema = new Schema({
   // tasks: [taskInfo],
   taskGroups: [taskGrpInfo],
   notifications: [{ body: String, date: Date }],
-  about: String,
+  about: { type: String },
   date: { type: Date, default: Date.now },
 });
 

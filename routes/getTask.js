@@ -8,10 +8,14 @@ const router = express.Router();
 
 router.post("/", isWorkspaceUser, async (req, res) => {
   try {
-    const taskGroupInfo = req.body.taskGroupInfo;
-    const taskGroup = await TaskGroup.findOne({ _id: taskGroupInfo.id });
-    const tasks = taskGroup?.tasks || [];
-    res.json(tasks);
+    const taskGrps = req.workspace.taskGroups;
+    let allTasks = [];
+    for (const e of taskGrps) {
+      const taskGroup = await TaskGroup.findOne({ _id: e.id });
+      const tasks = taskGroup?.tasks || [];
+      allTasks = [...allTasks, { name: e.name, id: e.id, items: tasks }];
+    }
+    res.json(allTasks);
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: err.message });

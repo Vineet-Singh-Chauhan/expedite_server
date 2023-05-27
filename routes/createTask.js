@@ -23,8 +23,8 @@ router.post("/", isWorkspaceUser, async (req, res) => {
     }
     const prevTasks = taskGrp.tasks;
     let task;
-    if (taskReq.taskId) {
-      task = Task.findOne({ _id: taskReq.taskId });
+    if (taskReq.id) {
+      task = await Task.findOne({ _id: taskReq.id });
       if (!task) {
         return res.status(404).json({ error: "Task  not found!" });
       }
@@ -40,8 +40,12 @@ router.post("/", isWorkspaceUser, async (req, res) => {
 
     const taskResult = await task.save();
     const taskInfo = { ...task, id: taskResult._id };
-
-    taskGrp.tasks = [...prevTasks, taskInfo];
+    if (!taskReq.id) {
+      taskGrp.tasks = [...prevTasks, taskInfo];
+    } else {
+      prevTasks.splice(prevTasks.indexOf(taskInfo), 1);
+      taskGrp.tasks = [...prevTasks, taskInfo];
+    }
     console.log(taskGrp);
     const result = await taskGrp.save();
     res.sendStatus(201);

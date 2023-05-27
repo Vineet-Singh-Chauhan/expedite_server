@@ -1,7 +1,7 @@
 const UserSchema = require("../models/UserSchema");
 const WorkspaceSchema = require("../models/WorkspaceSchema");
 
-const isWorkspaceUser = async (req, res, next) => {
+const isWorkspaceAdmin = async (req, res, next) => {
   const userId = req.user.id;
   const workspaceId = req.body.workspaceId;
   if (!userId) {
@@ -27,6 +27,12 @@ const isWorkspaceUser = async (req, res, next) => {
     if (!found) {
       return res.status(401).json({ error: "Forbidden resource" });
     }
+    if (workspace.adminId.toString() !== userId) {
+      console.log("here");
+      console.log(workspace.adminId.toString());
+      console.log(userId);
+      return res.status(401).json({ error: "Forbidden resource" });
+    }
     req.workspace = workspace;
     next();
   } catch (error) {
@@ -35,4 +41,4 @@ const isWorkspaceUser = async (req, res, next) => {
   }
 };
 
-module.exports = isWorkspaceUser;
+module.exports = isWorkspaceAdmin;

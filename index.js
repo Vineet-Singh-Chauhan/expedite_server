@@ -34,12 +34,14 @@ app.use("/api/refresh", require("./routes/auth/refresh"));
 app.use(verifyJWT);
 
 app.use("/api/getuser", require("./routes/getUser"));
+app.use("/api/workspaceinfo", require("./routes/workspaceInfo"));
 app.use("/api/createworkspace", require("./routes/createWorkspace"));
 app.use("/api/updateuser", require("./routes/updateuser"));
 app.use("/api/gettaskgrp", require("./routes/getTaskGrp"));
 app.use("/api/createtaskgrp", require("./routes/createTaskgrp"));
 app.use("/api/createtask", require("./routes/createTask"));
 app.use("/api/gettasks", require("./routes/getTask"));
+app.use("/api/updateworkspace", require("./routes/updateWorkspace"));
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
   app.listen(PORT, () => {
