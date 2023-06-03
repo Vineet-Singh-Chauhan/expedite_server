@@ -20,9 +20,10 @@ const sendMail = async ({ from, to, subject, text, html }) => {
   //   const { from, to, subject, text, html } = params;
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
+    host: "smtp.office365.com",
     port: 587,
     secure: false, // true for 465, false for other ports
+    "Encryption method": "STARTTLS",
     auth: {
       user: process.env.MAIL_ID, // generated ethereal user
       pass: process.env.MAIL_PASS, // generated ethereal password

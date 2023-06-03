@@ -29,6 +29,7 @@ app.use("/api/signin", require("./routes/auth/signin"));
 app.use("/api/signout", require("./routes/auth/signout"));
 app.use("/api/google-auth", require("./routes/auth/googleAuth"));
 app.use("/api/refresh", require("./routes/auth/refresh"));
+app.use("/api/inviteinfo", require("./routes/inviteInfo"));
 
 //protected
 app.use(verifyJWT);
@@ -42,6 +43,9 @@ app.use("/api/createtaskgrp", require("./routes/createTaskgrp"));
 app.use("/api/createtask", require("./routes/createTask"));
 app.use("/api/gettasks", require("./routes/getTask"));
 app.use("/api/updateworkspace", require("./routes/updateWorkspace"));
+app.use("/api/addmember", require("./routes/addMember"));
+app.use("/api/removemember", require("./routes/removeMember"));
+app.use("/api/acceptinvite", require("./routes/acceptInvite"));
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
   app.listen(PORT, () => {

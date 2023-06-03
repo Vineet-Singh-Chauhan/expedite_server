@@ -6,6 +6,7 @@ const WorkspaceSchema = new Schema({
   name: { type: String, required: true },
   adminId: { type: ObjectId, required: true },
   members: [membersInfo],
+  invitedMembers: [String],
   // tasks: [taskInfo],
   taskGroups: [taskGrpInfo],
   notifications: [{ body: String, date: Date }],
