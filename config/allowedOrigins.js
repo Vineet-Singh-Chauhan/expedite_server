@@ -3,6 +3,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://expedite-client.vercel.app",
   "https://expedite-server.vercel.app",
+  "smtp.office365.com",
 ];
 
 module.exports = allowedOrigins;
