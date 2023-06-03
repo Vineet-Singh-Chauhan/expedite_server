@@ -1,4 +1,4 @@
-require("dotenv");
+require("dotenv").config();
 const express = require("express");
 const isWorkspaceAdmin = require("../middleware/isWorkspaceAdmin");
 const { emailregex } = require("../config/regex");
@@ -46,13 +46,13 @@ router.post("/", isWorkspaceAdmin, async (req, res) => {
     const invitationUrl = `${process.env.BASE_URL}/invite/${invitationInfo}/`;
     workspace.invitedMembers = [...invitees, email];
     const result = workspace.save();
-    // const emailStat = await sendMail({
-    //   from: process.env.MAIL_ID,
-    //   to: email,
-    //   subject: "invitation mail",
-    //   text: invitationUrl,
-    //   html: `<ul><li>api for invitation left</li></ul><br/><a href="${invitationUrl}">Accept Invite</a>`,
-    // });
+    const emailStat = await sendMail({
+      from: process.env.MAIL_ID,
+      to: email,
+      subject: "invitation mail",
+      text: invitationUrl,
+      html: `<ul><li>api for invitation left</li></ul><br/><a href="${invitationUrl}">Accept Invite</a>`,
+    });
 
     res.sendStatus(204);
   } catch (err) {
