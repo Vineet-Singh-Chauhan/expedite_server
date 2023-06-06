@@ -42,7 +42,7 @@ router.post("/", isWorkspaceAdmin, async (req, res) => {
     console.log(workspaceArray);
 
     const newWorkspaceArray = workspaceArray.filter(
-      (e) => e.id.toString() === workspace.id.toString()
+      (e) => e.id.toString() !== workspace.id.toString()
     );
     user.workspaces = newWorkspaceArray;
     const resultUser = user.save();

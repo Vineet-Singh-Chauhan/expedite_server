@@ -46,6 +46,7 @@ app.use("/api/updateworkspace", require("./routes/updateWorkspace"));
 app.use("/api/addmember", require("./routes/addMember"));
 app.use("/api/removemember", require("./routes/removeMember"));
 app.use("/api/acceptinvite", require("./routes/acceptInvite"));
+app.use("/api/cancelinvite", require("./routes/removeInvite"));
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
   app.listen(PORT, () => {
