@@ -4,7 +4,7 @@ const { membersInfo } = require("./shortSchemas");
 ObjectId = Schema.ObjectId;
 const TaskSchema = new Schema({
   workspace: { type: ObjectId, required: true },
-  grpId: { type: ObjectId, required: true },
+  // grpId: { type: ObjectId, required: true },
   assignees: [membersInfo],
   dueDate: { type: Date },
   taskDesc: { type: String },

@@ -9,7 +9,7 @@ const membersInfo = new Schema({
 const taskInfo = new Schema({
   id: { type: ObjectId, required: true },
   workspace: { type: ObjectId, required: true },
-  grpId: { type: ObjectId, required: true },
+  // grpId: { type: ObjectId, required: true },
   assignees: [membersInfo],
   dueDate: { type: Date },
   taskDesc: { type: String },

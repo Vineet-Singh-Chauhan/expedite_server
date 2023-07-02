@@ -2,6 +2,10 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
+// const http = require("http");
+// const io = require("socket.io")(server);
+// const io = socketio(server);
+const PORT = process.env.PORT || 3000;
 
 //*connect to db
 const { default: mongoose } = require("mongoose");
@@ -11,8 +15,6 @@ const corsOptions = require("./config/corsOptions");
 const setCredentials = require("./middleware/setCredentials");
 const verifyJWT = require("./middleware/verifyJWT");
 // const bodyParser = require("body-parser");
-
-const PORT = process.env.PORT || 3000;
 
 //*connect to db
 connectToMongo();
