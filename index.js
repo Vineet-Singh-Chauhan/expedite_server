@@ -43,6 +43,7 @@ app.use("/api/updateuser", require("./routes/updateuser"));
 app.use("/api/gettaskgrp", require("./routes/getTaskGrp"));
 app.use("/api/createtaskgrp", require("./routes/createTaskgrp"));
 app.use("/api/createtask", require("./routes/createTask"));
+app.use("/api/updateTaskGroupName", require("./routes/updateTaskGroupName"));
 app.use("/api/deletetask", require("./routes/deleteTask"));
 app.use("/api/dragsettle", require("./routes/dragSettle"));
 app.use("/api/gettasks", require("./routes/getTask"));
