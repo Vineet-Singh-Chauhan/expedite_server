@@ -8,13 +8,36 @@ const router = express.Router();
 router.post("/", isWorkspaceUser, async (req, res) => {
   const { toPos, fromGrp, toGrp, taskId, fromPos } = req.body;
   console.log(toPos, fromGrp, toGrp, taskId);
-  if (!fromGrp || !taskId || !toGrp || !toPos.toString()) {
-    return res
-      .status(400)
-      .json({ error: "Please fill all the mandatory fields here!" });
-  }
 
   try {
+    if (!taskId && !toGrp) {
+      // group drag
+      let workspace = req.workspace;
+      if (!fromGrp || typeof toPos === typeof undefined) {
+        return res
+          .status(400)
+          .json({ error: "Please fill all the mandatory fields here!" });
+      }
+      if (toPos == fromPos) {
+        return res.sendStatus(200);
+      }
+      const taskGrpArray = workspace.taskGroups;
+      const taskGrpInfo = taskGrpArray.find((e) => e.id == fromGrp);
+      taskGrpArray.splice(fromPos, 1);
+      taskGrpArray.splice(toPos, 0, taskGrpInfo);
+      workspace.taskGroups = taskGrpArray;
+      const result = await workspace.save();
+      return res.sendStatus(201);
+    } else if (
+      !fromGrp ||
+      !taskId ||
+      !toGrp ||
+      typeof toPos === typeof undefined
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Please fill all the mandatory fields here!" });
+    }
     if (fromGrp != toGrp) {
       const fromTaskGrp = await TaskGroup.findOne({
         _id: fromGrp,
