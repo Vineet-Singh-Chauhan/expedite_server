@@ -7,8 +7,6 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   const workspaceName = req.body.workspaceName;
   const adminId = req.user.id;
-  // console.log(workspaceName, adminId);
-
   if (!workspaceName || !adminId) {
     return res
       .status(400)
@@ -18,31 +16,17 @@ router.post("/", async (req, res) => {
   if (!admin) {
     return res.status(401);
   }
-  // console.log(admin);
   try {
-    const result = await WorkspaceSchema.create({
+    const createdWorkspace = await WorkspaceSchema.create({
       name: workspaceName,
-      adminId,
-      members: [
-        {
-          id: adminId,
-          name: admin.firstName + " " + admin.lastName,
-          email: admin.email,
-        },
-      ],
+      admin: adminId,
+      members: [adminId],
     });
-    // console.log(result);
-    const prevWorkspaces = admin.workspaces;
-    // console.log(prevWorkspaces);
-    const newWorkspaceInfo = {
-      id: result._id,
-      name: workspaceName,
-    };
-    const newWorkspaceArray = [...prevWorkspaces, newWorkspaceInfo];
-    admin.workspaces = newWorkspaceArray;
-    const result2 = await admin.save();
-    // console.log(result2);
-    res.status(201).json({ id: result._id, name: workspaceName });
+    const userUpdate = await UserSchema.findOneAndUpdate(
+      { _id: adminId },
+      { $push: { workspaces: createdWorkspace._id } }
+    );
+    res.status(201).json({ id: createdWorkspace._id, name: workspaceName });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: err.message });

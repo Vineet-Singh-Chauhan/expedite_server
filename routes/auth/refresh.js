@@ -10,54 +10,52 @@ router.get("/", async (req, res) => {
     return res.sendStatus(401);
   }
   const refreshToken = cookies.jwt;
-  // console.log("refresh token revieved", refreshToken);
 
   // to make refresh token single use
   res.clearCookie("jwt", {
     httpOnly: true,
   });
 
-  const foundUser = await UserSchema.findOne({ refreshToken }).exec();
-  // console.log(foundUser);
+  const foundUser = await UserSchema.findOne({
+    refreshToken: refreshToken,
+  }).exec();
   if (!foundUser) {
     // detected refresh token reuse
-    // console.log("not this");
     jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET,
       async (err, decoded) => {
-        // tempered refresh token
-        if (err) return res.sendStatus(403);
+        if (err) {
+          // tempered refresh token
+          return res.sendStatus(403);
+        }
 
         // used refresh token
-        // console.log("decode id", decoded.user.id);
-        const hackedUser = await UserSchema.findOne({
-          _id: decoded.user.id,
+        const hackedUser = await UserSchema.findByIdAndUpdate(decoded.user.id, {
+          $set: {
+            refreshToken: [],
+          },
         }).exec();
-        // console.log("from refresh", hackedUser);
-        if (hackedUser) {
-          hackedUser.refreshToken = []; // invalidated all refresh tokens
-        }
-        const result = await hackedUser.save();
-        // console.log("form refresh", result);
       }
     );
     return res.sendStatus(403);
   }
 
   // if everything is okay
-  const newRefreshTokenArray = foundUser.refreshToken.filter(
-    (rt) => rt !== refreshToken
-  );
-
   // evaluate jwt
   jwt.verify(
     refreshToken,
     process.env.REFRESH_TOKEN_SECRET,
     async (err, decoded) => {
       if (err) {
-        foundUser.refreshToken = [...newRefreshTokenArray];
-        const result = await foundUser.save();
+        const foundUser2 = await UserSchema.findOneAndUpdate(
+          { refreshToken: refreshToken },
+          {
+            $pull: {
+              refreshToken: refreshToken,
+            },
+          }
+        ).exec();
       }
       if (err || foundUser.id !== decoded.user.id) {
         console.log("from refresh:", err);
@@ -69,7 +67,6 @@ router.get("/", async (req, res) => {
           id: foundUser._id,
         },
       };
-      // console.log("from refresh 2", payload);
       const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "30s",
       });
@@ -82,10 +79,15 @@ router.get("/", async (req, res) => {
         }
       );
       // saving refresh token with current user
-      foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
-      // console.log("new token:", newRefreshToken);
-      const result = await foundUser.save();
-      // console.log("new user:", foundUser);
+      const foundUser3 = await UserSchema.findOneAndUpdate(
+        { _id: decoded.user.id, refreshToken: refreshToken },
+        {
+          $set: {
+            "refreshToken.$": newRefreshToken,
+          },
+        }
+      ).exec();
+
       res.cookie("jwt", newRefreshToken, {
         httpOnly: true,
         sameSite: "None",

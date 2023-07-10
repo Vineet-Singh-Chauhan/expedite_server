@@ -12,7 +12,6 @@ router.post("/", async (req, res) => {
   const currentPassword = req.body.currPassword;
   const newPassword = req.body.newPassword;
   try {
-    // console.log(req.user.id);
     const user = await UserSchema.findOne({ _id: req.user.id });
     if (!user) {
       return res.sendStatus(401);
@@ -33,8 +32,6 @@ router.post("/", async (req, res) => {
     }
     if (currentPassword || newPassword) {
       if (currentPassword && newPassword) {
-        const cookies = req.cookies;
-
         const passwordCompare = await bcryptjs.compare(
           currentPassword,
           user.password
@@ -53,7 +50,6 @@ router.post("/", async (req, res) => {
             id: user._id,
           },
         };
-        // console.log("from signin:", payload);
         const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
           expiresIn: "30s",
         });
@@ -86,7 +82,7 @@ router.post("/", async (req, res) => {
       }
     }
     const result = await user.save();
-    res.status(201);
+    res.status(200);
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: err.message });

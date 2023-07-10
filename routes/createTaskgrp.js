@@ -2,10 +2,11 @@ const isWorkspaceUser = require("../middleware/isWorkspaceUser");
 const TaskGroup = require("../models/TaskGroup");
 
 const express = require("express");
+const WorkspaceSchema = require("../models/WorkspaceSchema");
 const router = express.Router();
 
 router.post("/", isWorkspaceUser, async (req, res) => {
-  const grpName = req.body.grpName;
+  const grpName = req.body.grpName.trim();
   if (!grpName) {
     return res
       .status(400)
@@ -13,17 +14,16 @@ router.post("/", isWorkspaceUser, async (req, res) => {
   }
 
   try {
-    let workspace = req.workspace;
     const taskGrp = await TaskGroup.create({
       name: grpName,
-      workspace: workspace._id,
+      workspace: req.workspace,
     });
-    workspace.taskGroups = [
-      ...workspace.taskGroups,
-      { id: taskGrp._id, name: taskGrp.name },
-    ];
-    const result = await workspace.save();
-    res.status(201).json({ id: taskGrp._id, name: taskGrp.name });
+    const updatedWorkspace = await WorkspaceSchema.findOneAndUpdate(
+      { _id: req.workspace },
+      { $push: { taskGroups: taskGrp._id } }
+    );
+
+    res.sendStatus(201);
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: err.message });

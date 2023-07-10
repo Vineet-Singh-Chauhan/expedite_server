@@ -26,35 +26,29 @@ router.post("/", async (req, res) => {
             .status(400)
             .json({ error: "Please fill all the mandatory fields!" });
         }
-        const workspace = await WorkspaceSchema.findOne({ _id: workspaceId });
-        if (!workspace) {
-          return res
-            .status(403)
-            .json({ error: "Workspace do not exist anymore" });
-        }
-        const invitedMembers = workspace.invitedMembers;
-        if (!invitedMembers.includes(email)) {
-          return res.status(400).json({ error: "Link expired!" });
-        }
-        const user = await UserSchema.findOne({ email: email });
-        if (!user) {
-          return res.status(403).json({ error: "Create an account first" });
-        }
+        const workspace = await WorkspaceSchema.findOne({
+          _id: workspaceId,
+          invitedMembers: email,
+        }).populate({
+          path: "members",
+          match: { email: email },
+        });
 
-        const invitees = workspace.invitedMembers;
-
-        if (!invitees.includes(email)) {
+        if (workspace === null) {
           return res.status(400).json({
             error: "Link Expired!",
           });
         }
-        const members = workspace.members;
-
-        const isWorkspaceMember = members.some((e) => e.email === email);
-        if (isWorkspaceMember) {
+        if (workspace?.members.length !== 0) {
+          //this will never haapen
           return res.status(400).json({
-            error: "User with this email id already a member of this workspace",
+            error: "User with this email id already a member on this workspace",
           });
+        }
+
+        const user = await UserSchema.findOne({ email: email });
+        if (!user) {
+          return res.status(401).json({ error: "Create an account first" });
         }
 
         const payload = {

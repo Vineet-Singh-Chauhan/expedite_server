@@ -8,7 +8,6 @@ const router = express.Router();
 router.post("/", isWorkspaceUser, async (req, res) => {
   const taskId = req.body.taskId;
   const grpId = req.body.grpId;
-  console.log(taskId, grpId);
   if (!grpId || !taskId) {
     return res
       .status(400)
@@ -16,23 +15,20 @@ router.post("/", isWorkspaceUser, async (req, res) => {
   }
 
   try {
-    let workspace = req.workspace;
-    const taskGrp = await TaskGroup.findOne({
-      _id: grpId,
-    });
+    const taskGrp = await TaskGroup.findOneAndUpdate(
+      {
+        _id: grpId,
+      },
+      {
+        $pull: { tasks: taskId },
+      }
+    );
     if (!taskGrp) {
       return res.status(404).json({ error: "Task group not found!" });
     }
-
     const deleteResult = await Task.deleteOne({
       _id: taskId,
     });
-
-    const prevTasks = taskGrp.tasks;
-    const newTasks = prevTasks.filter((e) => e.id != taskId);
-    taskGrp.tasks = newTasks;
-    const result = await taskGrp.save();
-
     res.sendStatus(200);
   } catch (err) {
     console.log(err);

@@ -27,62 +27,31 @@ router.post("/", async (req, res) => {
             .status(400)
             .json({ error: "Please fill all the mandatory fields!" });
         }
-        const workspace = await WorkspaceSchema.findOne({ _id: workspaceId });
-        if (!workspace) {
-          return res
-            .status(403)
-            .json({ error: "Workspace do not exist anymore" });
-        }
-        const invitedMembers = workspace.invitedMembers;
-        if (!invitedMembers.includes(email)) {
+        const user = await UserSchema.findOneAndUpdate(
+          {
+            _id: loggedUser.id,
+            email: email,
+          },
+          {
+            $push: { workspaces: workspaceId },
+          }
+        );
+        if (!user) {
           return res.status(403).json({ error: "Link expired!" });
         }
-        const user = await UserSchema.findOne({ email: email });
-        if (!user) {
-          return res.status(403).json({ error: "Create an account first" });
-        }
-        console.log(loggedUser.id);
-        if (user._id.toString() !== loggedUser.id.toString()) {
-          return res.status(403).json({ error: "Log-in to continue" });
-        }
 
-        const members = workspace.members;
-
-        const isWorkspaceMember = members.some((e) => e.email === email);
-
-        if (isWorkspaceMember) {
-          return res.status(400).json({
-            error: "User with this email id already a member of this workspace",
-          });
-        }
-
-        const invitees = workspace.invitedMembers;
-
-        if (!invitees.includes(email)) {
-          return res.status(400).json({
-            error: "Link Expired!",
-          });
-        }
-
-        workspace.members = [
-          ...members,
+        const workspace = await WorkspaceSchema.findOneAndUpdate(
+          { _id: workspaceId, invitedMembers: email },
           {
-            id: user._id,
-            name: user.firstName + " " + user.lastName,
-            email: user.email,
-          },
-        ];
-        const newInvitees = invitees.filter((e) => e !== user.email);
-        workspace.invitedMembers = newInvitees;
-        console.log(newInvitees);
-        await workspace.save();
-        const prevWorkspaces = user.workspaces;
-        user.workspaces = [
-          ...prevWorkspaces,
-          { id: workspace._id, name: workspace.name },
-        ];
-        await user.save();
-        console.log(workspace._id.toString());
+            $push: { members: user._id },
+            $pull: { invitedMembers: user.email },
+          }
+        );
+
+        if (!workspace) {
+          return res.status(403).json({ error: "Link Expired!" });
+        }
+
         res.status(204).json({ workspaceId: workspace._id.toString() });
       }
     );

@@ -1,5 +1,4 @@
 const isWorkspaceUser = require("../middleware/isWorkspaceUser");
-const Task = require("../models/Task");
 const TaskGroup = require("../models/TaskGroup");
 
 const express = require("express");
@@ -15,15 +14,9 @@ router.post("/", isWorkspaceUser, async (req, res) => {
   }
 
   try {
-    let workspace = req.workspace;
-    const taskGrp = await TaskGroup.findOne({
-      _id: grpId,
+    const taskGrp = await TaskGroup.findByIdAndUpdate(grpId, {
+      name: name,
     });
-    if (!taskGrp) {
-      return res.status(404).json({ error: "Task group not found!" });
-    }
-    taskGrp.name = name;
-    const result = await taskGrp.save();
     res.sendStatus(200);
   } catch (err) {
     console.log(err);

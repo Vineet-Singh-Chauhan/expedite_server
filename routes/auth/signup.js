@@ -24,9 +24,6 @@ router.post("/", async (req, res) => {
     password,
     phone,
   } = req.body;
-  // console.log(req.body);
-
-  // console.log(req);
 
   if (
     !firstName ||
@@ -37,15 +34,6 @@ router.post("/", async (req, res) => {
     !password ||
     !confirmPassword
   ) {
-    const errors = {
-      firstName: !firstName ? "This is mandatory field!" : null,
-      lastName: !lastName ? "This is mandatory field!" : null,
-      gender: !gender ? "This is mandatory field!" : null,
-      dob: !dob ? "This is mandatory field!" : null,
-      email: !email ? "This is mandatory field!" : null,
-      password: !password ? "This is mandatory field!" : null,
-      confirmPassword: !confirmPassword ? "This is mandatory field!" : null,
-    };
     return res
       .status(400)
       .json({ error: "Please fill all the mandatory fields!" });
@@ -57,18 +45,6 @@ router.post("/", async (req, res) => {
     !emailregex.test(email) ||
     !passwordRegex.test(password)
   ) {
-    const errors = {
-      firstName: !nameregex.test(firstName)
-        ? "First name can only contain alphabets !"
-        : null,
-      lastName: !nameregex.test(lastName)
-        ? "Last name can only contain alphabets !"
-        : null,
-      email: !emailregex.test(email) ? "This is mandatory field!" : null,
-      password: !passwordRegex.test(password)
-        ? "This is mandatory field!"
-        : null,
-    };
     return res
       .status(400)
       .json({ error: "Invalid input is recieved in one or more field(s)" });
@@ -110,15 +86,12 @@ router.post("/", async (req, res) => {
       password: hashedPwd,
       phone,
     });
-    // console.log(result);
     const payload = {
       user: {
         id: result._id,
       },
     };
-    // console.log(payload);
     const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET);
-    // console.log(accessToken);
     res.status(201).json({
       message: `Hooray! ${firstName} you have successfully been registered.`,
       accessToken,

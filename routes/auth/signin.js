@@ -22,8 +22,6 @@ router.post("/", async (req, res) => {
       password,
       foundUser.password
     );
-    // console.log(foundUser.password);
-    // console.log(passwordCompare);
     if (!passwordCompare) {
       return res.status(400).json({ error: "Enter valid email and password!" }); //bad request
     }
@@ -32,7 +30,6 @@ router.post("/", async (req, res) => {
         id: foundUser._id,
       },
     };
-    // console.log("from signin:", payload);
     const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: "30s",
     });
@@ -43,30 +40,45 @@ router.post("/", async (req, res) => {
         expiresIn: "1d",
       }
     );
-
-    // invalidating used token
-    let newRefreshTokenArray = !cookies?.jwt
-      ? foundUser.refreshToken
-      : foundUser.refreshToken.filter((rt) => rt !== cookies.jwt);
-
+    if (!cookies?.jwt) {
+      //new sign in
+      const user = await UserSchema.findOneAndUpdate(
+        { email },
+        {
+          $push: {
+            refreshToken: newRefreshToken,
+          },
+        }
+      ).exec();
+    }
     if (cookies?.jwt) {
       const refreshToken = cookies.jwt;
       const foundToken = await UserSchema.findOne({ refreshToken }).exec();
-
-      // detected RT reuse
       if (!foundToken) {
-        // console.log("attempted refresh token reuse at login");
-        newRefreshTokenArray = [];
+        // detected RT reuse
+        const hackedUser = await UserSchema.findOneAndUpdate(
+          { email },
+          {
+            $set: {
+              refreshToken: [newRefreshToken],
+            },
+          }
+        ).exec();
+      } else {
+        //everything is okay
+        const user = await UserSchema.findOneAndUpdate(
+          { email: email, refreshToken: refreshToken },
+          {
+            $set: {
+              "refreshToken.$": newRefreshToken,
+            },
+          }
+        ).exec();
       }
-
       res.clearCookie("jwt", {
         httpOnly: true,
       });
     }
-
-    foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
-    const result = await foundUser.save();
-    // console.log(result);
 
     res.cookie("jwt", newRefreshToken, {
       httpOnly: true,

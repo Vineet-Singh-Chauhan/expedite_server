@@ -7,27 +7,24 @@ const isWorkspaceUser = async (req, res, next) => {
   if (!userId) {
     return res.status(403).send({ error: " Please authenticate first!" });
   }
-  const user = await UserSchema.findOne({ _id: userId });
-  if (!user) {
-    return res.sendStatus(401);
-  }
   if (!workspaceId || !workspaceId.match(/^[0-9a-fA-F]{24}$/)) {
     return res.status(404).json({ error: "Workspace not found !" });
   }
+  const user = await UserSchema.findOne({ _id: userId });
+
+  if (!user) {
+    return res.sendStatus(401);
+  }
 
   try {
-    const workspace = await WorkspaceSchema.findOne({
+    const isMember = await WorkspaceSchema.findOne({
       _id: workspaceId,
+      members: { $elemMatch: { $eq: userId } },
     }).exec();
-    if (!workspace) {
+    if (!isMember) {
       return res.status(404).json({ error: "Workspace not found !" });
     }
-    const members = workspace.members;
-    const found = members.some((el) => el.id == userId);
-    if (!found) {
-      return res.status(401).json({ error: "Forbidden resource" });
-    }
-    req.workspace = workspace;
+    req.workspace = isMember._id;
     next();
   } catch (error) {
     console.log(error.message);

@@ -5,9 +5,9 @@ const { emailregex } = require("../config/regex");
 const sendMail = require("../config/nodemailer");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const WorkspaceSchema = require("../models/WorkspaceSchema");
 router.post("/", isWorkspaceAdmin, async (req, res) => {
   const email = req.body.email;
-  const workspace = req.workspace;
   if (!email) {
     return res
       .status(400)
@@ -18,25 +18,37 @@ router.post("/", isWorkspaceAdmin, async (req, res) => {
   }
 
   try {
-    const members = workspace.members;
-    const isWorkspaceMember = members.some((e) => e.email === email);
+    const workspace = await WorkspaceSchema.findOne({
+      _id: req.workspace,
+      invitedMembers: { $ne: email },
+    }).populate({
+      path: "members",
+      match: { email: { $ne: email } },
+    });
+    // console.log("members --->", workspace?.members); // provided above is true, if this does not exist, person is already a member
+    // console.log("workspace  --->", workspace); // if doesnot exists ,  member is already invited
 
-    if (isWorkspaceMember) {
+    if (workspace !== null && workspace?.members.length === 0) {
       return res.status(400).json({
         error: "User with this email id already a member of this workspace",
       });
     }
-
-    const invitees = workspace.invitedMembers;
-
-    if (invitees.includes(email)) {
+    if (workspace === null) {
       return res.status(400).json({
         error: "User with this email id already  invited on this workspace",
       });
     }
+    const updatedWorkspace = await WorkspaceSchema.findOneAndUpdate(
+      {
+        _id: workspace._id,
+      },
+      {
+        $addToSet: { invitedMembers: email },
+      }
+    );
 
     const payload = {
-      workspaceId: workspace._id,
+      workspaceId: updatedWorkspace._id,
       email: email,
     };
     const invitationInfo = jwt.sign(
@@ -44,8 +56,7 @@ router.post("/", isWorkspaceAdmin, async (req, res) => {
       process.env.INVITATION_TOKEN_SECRET
     );
     const invitationUrl = `${process.env.BASE_URL}/invite/${invitationInfo}/`;
-    workspace.invitedMembers = [...invitees, email];
-    const result = workspace.save();
+
     const emailStat = await sendMail({
       from: process.env.MAIL_ID,
       to: email,
@@ -53,7 +64,6 @@ router.post("/", isWorkspaceAdmin, async (req, res) => {
       text: invitationUrl,
       html: `<ul><li>api for invitation left</li></ul><br/><a href="${invitationUrl}">Accept Invite</a>`,
     });
-
     res.sendStatus(204);
   } catch (err) {
     console.log(err);

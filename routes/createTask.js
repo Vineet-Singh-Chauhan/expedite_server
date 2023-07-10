@@ -7,47 +7,33 @@ const router = express.Router();
 
 router.post("/", isWorkspaceUser, async (req, res) => {
   const taskReq = req.body;
-  if (!taskReq.grpId || !taskReq.taskTitle) {
+  if (!taskReq.grpId || !taskReq.taskTitle.trim()) {
     return res
       .status(400)
       .json({ error: "Please fill all the mandatory fields!" });
   }
 
   try {
-    let workspace = req.workspace;
-    const taskGrp = await TaskGroup.findOne({
-      _id: taskReq.grpId,
-    });
-    if (!taskGrp) {
-      return res.status(404).json({ error: "Task group not found!" });
-    }
-    const prevTasks = taskGrp.tasks;
-    let task;
-    if (taskReq.id) {
-      task = await Task.findOne({ _id: taskReq.id });
+    if (taskReq._id) {
+      const task = await Task.findOneAndUpdate(
+        { _id: taskReq._id },
+        {
+          ...taskReq,
+        }
+      );
       if (!task) {
         return res.status(404).json({ error: "Task  not found!" });
       }
     } else {
-      task = new Task();
+      const createdTask = await Task.create({
+        ...taskReq,
+        workspace: req.workspace,
+      });
+      const taskGrp = await TaskGroup.findOneAndUpdate(
+        { _id: taskReq.grpId },
+        { $push: { tasks: createdTask._id } }
+      );
     }
-    for (let k in taskReq) {
-      if (taskReq[k]) {
-        task[k] = taskReq[k];
-      }
-    }
-    task.workspace = workspace._id;
-
-    const taskResult = await task.save();
-    const taskInfo = { ...task, id: taskResult._id };
-    if (!taskReq.id) {
-      taskGrp.tasks = [...prevTasks, taskInfo];
-    } else {
-      prevTasks.splice(prevTasks.indexOf(taskInfo), 1);
-      taskGrp.tasks = [...prevTasks, taskInfo];
-    }
-    console.log(taskGrp);
-    const result = await taskGrp.save();
     res.sendStatus(201);
   } catch (err) {
     console.log(err);

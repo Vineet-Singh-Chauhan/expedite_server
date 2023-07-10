@@ -5,10 +5,11 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   try {
     const userId = req.user.id;
-    // grab all details except pssword
-    const user = await UserSchema.findById(userId).select(
+    // grab all details except password and refresh tokens
+    const user = await UserSchema.findById(
+      userId,
       "-password -refreshToken"
-    );
+    ).populate("workspaces", "name");
     res.send(user);
   } catch (error) {
     console.log(error.message);
