@@ -23,12 +23,12 @@ router.post("/", isWorkspaceAdmin, async (req, res) => {
       invitedMembers: { $ne: email },
     }).populate({
       path: "members",
-      match: { email: { $ne: email } },
+      match: { email: { $eq: email } },
     });
     // console.log("members --->", workspace?.members); // provided above is true, if this does not exist, person is already a member
     // console.log("workspace  --->", workspace); // if doesnot exists ,  member is already invited
 
-    if (workspace !== null && workspace?.members.length === 0) {
+    if (workspace !== null && workspace?.members.length !== 0) {
       return res.status(400).json({
         error: "User with this email id already a member of this workspace",
       });

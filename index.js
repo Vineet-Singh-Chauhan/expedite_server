@@ -51,7 +51,35 @@ app.use("/api/cancelinvite", require("./routes/removeInvite"));
 
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`Server running on PORT ${PORT}`);
+  });
+  const io = require("socket.io")(server, {
+    pingTimeout: 600000,
+    cors: { corsOptions },
+  });
+  io.on("connection", (socket) => {
+    console.log("connected to socket.io ");
+
+    socket.on("setup", (user) => {
+      socket.join(user?._id);
+      console.log("setup event , user -->", user?._id);
+      socket.emit("connected");
+    });
+
+    socket.on("joinWorkspace", (workspaceId) => {
+      socket.join(workspaceId);
+      console.log("user joined workspace,", workspaceId);
+    });
+
+    socket.on("dragEnd", (newMessageRecieved) => {
+      let workspace = newMessageRecieved.workspaceId;
+      socket.in(workspace).emit("settleDrag", newMessageRecieved);
+    });
+
+    socket.off("setup", (user) => {
+      console.log("user disconnected", user._id);
+      socket.leave(user._id);
+    });
   });
 });

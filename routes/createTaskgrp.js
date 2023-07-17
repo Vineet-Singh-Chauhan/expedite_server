@@ -23,7 +23,7 @@ router.post("/", isWorkspaceUser, async (req, res) => {
       { $push: { taskGroups: taskGrp._id } }
     );
 
-    res.sendStatus(201);
+    res.status(201).json(taskGrp);
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: err.message });
