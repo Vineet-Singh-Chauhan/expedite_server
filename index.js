@@ -64,7 +64,6 @@ mongoose.connection.once("open", () => {
     socket.on("setup", (user) => {
       socket.join(user?._id);
       console.log("setup event , user -->", user?._id);
-      socket.emit("connected");
     });
 
     socket.on("joinWorkspace", (workspaceId) => {
@@ -72,14 +71,19 @@ mongoose.connection.once("open", () => {
       console.log("user joined workspace,", workspaceId);
     });
 
-    socket.on("dragEnd", (newMessageRecieved) => {
-      let workspace = newMessageRecieved.workspaceId;
-      socket.in(workspace).emit("settleDrag", newMessageRecieved);
+    socket.on("changeEmitted", (details) => {
+      socket.broadcast
+        .to(details.workspaceId)
+        .emit("changeRecieved", details.workspaceId);
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("user disconnected", reason);
     });
 
     socket.off("setup", (user) => {
-      console.log("user disconnected", user._id);
-      socket.leave(user._id);
+      socket.leave(user?._id);
+      console.log("setup leave , user -->", user?._id);
     });
   });
 });

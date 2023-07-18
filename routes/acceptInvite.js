@@ -52,7 +52,7 @@ router.post("/", async (req, res) => {
           return res.status(403).json({ error: "Link Expired!" });
         }
 
-        res.status(204).json({ workspaceId: workspace._id.toString() });
+        res.status(200).json({ workspaceId: workspace._id });
       }
     );
   } catch (err) {
